@@ -1,4 +1,4 @@
-Django RESTful API. A RESTful api framework for Django
+RESTful API framework for Django
 =====================================================
 
 
@@ -39,6 +39,8 @@ from sample_app.models import SampleModel
 class IndexHandler(BaseIndexHandler):
 	allowed_methods = ('GET', ) 
 	query_model = SampleModel
+	read_auth_exempt = True
+
 ```
 
 Add request path to **urls.py**:
@@ -49,8 +51,7 @@ Add request path to **urls.py**:
 from django.conf.urls import url
 from django.contrib import admin
 
-from django.conf.urls import include
-
+from sample_app.handlers import IndexHandler
 from rest_api.resources import BaseResource
 
 urlpatterns = [
@@ -59,11 +60,11 @@ urlpatterns = [
 ]
 ```
 
-Create a model to your django database:
+Create a model to your Django database (run in **./manage.py shell**):
 
 ```python
-from sample_app.models import SampleModel
-SampleModel(sequence=123, title="I am a Sample").save()
+>> from sample_app.models import SampleModel
+>> SampleModel(sequence=123, title="I am a Sample").save()
 ```
 
 Make a http request to **/api/sample_model/**
@@ -83,3 +84,23 @@ You will get your first api response:
    "success": true
 }
 ```
+
+## Runnable Django Example Project
+A full example is in **django_example** folder. After download, do:
+
+**Install django-rest-api (best in a virtual env):**
+
+```pip install -r requirements.txt```
+
+**Runserver:**
+
+```./manage.py runserver```
+
+**Open [http://localhost:8000/api/sample_model/](http://localhost:8000/api/sample_model/) :**
+
+You will get a sample response from your db models:
+![](https://c1.staticflickr.com/5/4468/37465605956_8f5f57841b_b.jpg)
+
+Try to add new model to your database and see api response change.
+
+
