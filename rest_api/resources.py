@@ -117,16 +117,19 @@ class BaseResource(Resource):
                 display_success = settings.REST_API_DISPLAY_SUCCESS
 
             if use_wrapper:
-                if type(raw_response)==dict and raw_response.has_key('_info') and raw_response.has_key('_response'):
+                if type(raw_response)==dict and raw_response.has_key('_info') and raw_response.has_key('_data'):
                     result = {
-                        'response': raw_response['_response'],
+                        'data': raw_response['_data'],
                         'info': raw_response['_info'],
                     }
                 else:
-                    result = {
-                        'response': raw_response,
-                        'info': {}
-                    }
+                    if type(raw_response)==dict:
+                        result = raw_response
+                    else:
+                        result = {
+                            'data': raw_response,
+                            'info': {}
+                        }
 
                 if display_success:
                     result['success'] = True

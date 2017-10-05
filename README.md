@@ -72,7 +72,7 @@ You will get your first api response:
 ```json
 {
   "info": {}, 
-  "response": [
+  "data": [
     {
       "sequence": 123, 
       "title": "I am a Sample", 
