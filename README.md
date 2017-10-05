@@ -1,2 +1,2 @@
-# django-rest-api
-Django RESTful api framework
+Django Rest API, the Restful api framework for Django
+=====================================================
