@@ -38,6 +38,14 @@ def make_error_response(code, debug=None):
             'message': error_message,
         }
     }
+
+    display_success = False
+    if hasattr(settings, 'REST_API_DISPLAY_SUCCESS'):
+        display_success = settings.REST_API_DISPLAY_SUCCESS
+
+    if display_success:
+        content['success'] = False
+
     if debug:
         content['error']['debug'] = debug
     
@@ -104,6 +112,10 @@ class BaseResource(Resource):
             if hasattr(settings, 'REST_API_WITH_WRAPPER'):
                 use_wrapper = settings.REST_API_WITH_WRAPPER
 
+            display_success = False
+            if hasattr(settings, 'REST_API_DISPLAY_SUCCESS'):
+                display_success = settings.REST_API_DISPLAY_SUCCESS
+
             if use_wrapper:
                 if type(raw_response)==dict and raw_response.has_key('_info') and raw_response.has_key('_response'):
                     result = {
@@ -115,9 +127,12 @@ class BaseResource(Resource):
                         'response': raw_response,
                         'info': {}
                     }
+
+                if display_success:
+                    result['success'] = True
             else:
                 result = raw_response
-            
+
         except Exception, e:
             result = self.error_handler(e, request, meth)
 
