@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import DatabaseError
+from django.core.mail import send_mail, EmailMessage
 
 from rest_api.emitters import Emitter
 from rest_api.piston.doc import HandlerMethod
@@ -164,16 +165,14 @@ class BaseResource(Resource):
             return e.response
 
     def email_exception(self, reporter):
-        # Implement Your Email Function
-
+        # Implement your email method
         """
-        subject = "Piston crash report"
+        subject = "API crash report"
         html = reporter.get_traceback_html()
         email_subject = settings.EMAIL_SUBJECT_PREFIX+subject
         to = [admin[1] for admin in settings.ADMINS]
         send_email(email_subject, '', html, settings.SERVER_EMAIL, to, throttle=True)
         """
-        print 'Implement Your Email Exception'
         pass
     
     def error_handler(self, e, request, meth):
