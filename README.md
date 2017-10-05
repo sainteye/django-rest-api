@@ -10,7 +10,7 @@ Implement **to_json** method for your Django model:
 
 **sample_app/models.py**
 
-```
+```python
 from django.utils import timezone
 from django.db import models
 
@@ -32,7 +32,7 @@ Create **handlers.py** file for your Django model:
 
 **sample_app/handlers.py**
 
-```
+```python
 from rest_api.handler import BaseIndexHandler
 from sample_app.models import SampleModel
 
@@ -45,7 +45,7 @@ Add request path to **urls.py**:
 
 **urls.py**
 
-```
+```python
 from django.conf.urls import url
 from django.contrib import admin
 
@@ -61,7 +61,7 @@ urlpatterns = [
 
 Create a model to your django database:
 
-```
+```python
 from sample_app.models import SampleModel
 SampleModel(sequence=123, title="I am a Sample").save()
 ```
@@ -70,7 +70,7 @@ Make a http request to **/api/sample_model/**
 
 You will get your first api response:
 
-```
+```json
 {
    "info": {}, 
    "response": [
