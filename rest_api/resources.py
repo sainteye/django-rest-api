@@ -33,7 +33,6 @@ def make_error_response(code, debug=None):
             api_errors.API_ERRORS[api_errors.ERROR_GENERAL_UNKNOWN_ERROR]
     
     content = {
-        'success': False,
         'error': {
             'code': error_code,
             'message': error_message,
@@ -42,7 +41,7 @@ def make_error_response(code, debug=None):
     if debug:
         content['error']['debug'] = debug
     
-    result = rc.ALL_OK
+    result = rc.BAD_REQUEST
     if code == api_errors.ERROR_AUTH_NOT_AUTHENTICATED:
         result = rc.FORBIDDEN
     elif code == api_errors.ERROR_AUTH_BAD_CREDENTIALS:
@@ -101,18 +100,24 @@ class BaseResource(Resource):
             request = process_request(handler, request, *args, **kwargs)
             raw_response = meth(request, *args, **kwargs)
             # An implicit protocal for deliver info from handler
-            if type(raw_response)==dict and raw_response.has_key('_info') and raw_response.has_key('_response'):
-                result = {
-                    'success': True,
-                    'response': raw_response['_response'],
-                    'info': raw_response['_info'],
-                }
+            use_wrapper = False
+            if hasattr(settings, 'REST_API_WITH_WRAPPER'):
+                use_wrapper = settings.REST_API_WITH_WRAPPER
+
+            if use_wrapper:
+                if type(raw_response)==dict and raw_response.has_key('_info') and raw_response.has_key('_response'):
+                    result = {
+                        'response': raw_response['_response'],
+                        'info': raw_response['_info'],
+                    }
+                else:
+                    result = {
+                        'response': raw_response,
+                        'info': {}
+                    }
             else:
-                result = {
-                    'success': True,
-                    'response': raw_response,
-                    'info': {}
-                }
+                result = raw_response
+            
         except Exception, e:
             result = self.error_handler(e, request, meth)
 

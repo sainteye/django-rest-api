@@ -60,7 +60,7 @@ urlpatterns = [
 ]
 ```
 
-Create a model to your Django database (run in **./manage.py shell**):
+Create an object to your Django database (run in **./manage.py shell**):
 
 ```python
 >> from sample_app.models import SampleModel
@@ -85,6 +85,8 @@ You will get your first api response:
 }
 ```
 
+**created** will be the timestamp you create your object
+
 ## Runnable Django Example Project
 A full example is in **django_example** folder. After download, do:
 
@@ -101,6 +103,6 @@ A full example is in **django_example** folder. After download, do:
 You will get a sample response from your db models:
 ![](https://c1.staticflickr.com/5/4468/37465605956_8f5f57841b_b.jpg)
 
-Try to add new model to your database and see api response change.
+Try to add new object to your database and see api response change.
 
 
