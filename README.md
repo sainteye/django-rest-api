@@ -2,12 +2,20 @@ RESTful API framework for Django
 =====================================================
 
 
-Thanks for taking a look at **django-rest-api**! We take pride in having an easy-to-use api solution that works for Django.
+Thanks for taking a look at **django-rest-api**! We take pride in having an easy-to-use api solution that works for Django. 
+
+This framework is based on [django-piston](https://pypi.python.org/pypi/django-piston/0.2.3) (but basically they are very different). It should work for Django version greater than `Django==1.11.5`.
 
 
 ## Simple Usage for Django Model RESTful API
 
-Add `'rest_api'` to installed_apps:
+To install django-rest-api, simply use pip:
+
+```
+pip install https://github.com/sainteye/django-rest-api/tarball/master
+```
+
+Then add `'rest_api'` to your Django `INSTALLED_APPS`:
 
 **settings.py**
 
@@ -19,7 +27,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-Implement **to_json** method for your Django model:
+Implement `to_json` method for your Django model:
 
 **sample_app/models.py**
 
@@ -74,7 +82,7 @@ urlpatterns = [
 ]
 ```
 
-Create an object to your Django database (run in **./manage.py shell**):
+Create an object to your Django database (run in `./manage.py shell`):
 
 ```python
 >>> from sample_app.models import SampleModel
@@ -107,25 +115,41 @@ You will get your first api response:
 }
 ```
 
-**created** is the timestamp you create your object.
-
-## Installation
-
-To install django-rest-api, simply use pip:
-
-```
-pip install https://github.com/sainteye/django-rest-api/tarball/master
-```
+(**created** is the timestamp of the creation time of your objects.)
 
 
-# Framework Documentation
-
-## IndexHandler & ObjectHandler
+# High-Level Concept
 
 For RESTful api, basically we have two different type resources. One is for collection resource, another one is for any single object in the collection.
 
 
-### IndexHandler: 
+## IndexHandler - Collection Resource
+
+### URL /api/:collection/
+
+**Sample Response Structure**
+
+```json
+{
+  "data": [
+    {
+      "title": "Sample Title",
+      "sequence": 123,
+      "id": 1,
+      "created": 1507528440
+    },
+    {
+      "title": "Another Title",
+      "sequence": 777,
+      "id": 2,
+      "created": 1507528451
+    }
+  ],
+  "info": {},
+  "success": true
+}
+```
+
 IndexHandler is designed for **collection resource**. When you make a GET request to url like **/api/:collection/**, it will return collection objects. If you make a POST request to **/api/:collection/**, it will create an object to this collection.
 
 #### GET /api/:collection/
@@ -190,6 +214,7 @@ If you are using our sample project, then you can login by enter
 Here are some Good requests (will create an object):
 
 `POST /api/sample_model/ title="New Title" sequence="789"`
+
 `POST /api/sample_model/ title="Another New Title"`
 
 Below is a Bad request (will **NOT** create an object and will return **"400 Bad Request"**):
@@ -209,7 +234,21 @@ Below is a Bad request (will **NOT** create an object and will return **"400 Bad
 
 TODO: link to error handling section
 
-### ObjectHandler: 
+## ObjectHandler - Object Resource
+
+### URL /api/:collection/:object_id/
+
+**Sample Response Structure**
+
+```json
+{
+  "id": 1,
+  "title": "Sample Title",
+  "sequence": 123,
+  "created": 1507528440
+}
+```
+
 ObjectHandler is designed for getting, updating or deleting an **object resource**. 
 
 #### GET: Getting an object
