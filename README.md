@@ -4,16 +4,10 @@ RESTful API framework for Django
 
 Thanks for taking a look at **django-rest-api**! We take pride in having an easy-to-use api solution that works for Django.
 
-## Install
-
-```
-pip install https://github.com/sainteye/django-rest-api/tarball/master
-```
-
 
 ## Simple Usage for Django Model RESTful API
 
-Add **rest_api** to installed_apps:
+Add `'rest_api'` to installed_apps:
 
 **settings.py**
 
@@ -114,6 +108,17 @@ You will get your first api response:
 
 **created** is the timestamp you create your object.
 
+## Installation
+
+To install django-rest-api, simply use pip:
+
+```
+pip install https://github.com/sainteye/django-rest-api/tarball/master
+```
+
+
+# Framework Documentation
+
 ## IndexHandler & ObjectHandler
 
 For RESTful api, basically we have two different type resources. One is for collection resource, another one is for any single object in the collection.
@@ -135,7 +140,7 @@ class IndexHandler(BaseIndexHandler):
 	read_auth_exempt = True
 ```
 
-set attribute **read\_auth\_exempt = True** to ensure anonymous users can access this resource. Otherwise, only loggined users can access this resource.
+set attribute `read_auth_exempt = True` to ensure anonymous users can access this resource. Otherwise, only loggined users can access this resource.
 
 
 #### POST /api/:collection/
@@ -166,17 +171,28 @@ class IndexHandler(BaseIndexHandler):
 
 `create_kwargs` defines what POST data will be passed into `create` method. You can access these data in `request.CLEANED`, it is a dictionary just like **"request.GET/request.POST"** in native django Request object. `required_fields` defines what POST data **must** be specified by request. If a user did not specify the data content for fields in `required_fields`, api will return **"400 Bad Request"**. 
 
-Basically, users have to login your service to create an object. Therefore, by default we should set `create_auth_exempt = False`.
+Basically, users have to login your service to create an object. Therefore, by default we should set `create_auth_exempt = False`. If you set `create_auth_exempt = False` and you have not loggined your api server, you will get **"401 Unauthorized"**:
 
-If you are using the sample project, you can login here
+```json
+{
+    "success": false,
+    "error": {
+        "message": "Authentication required.",
+        "code": 10100
+    }
+}
+
+```
+
+If you are using our sample project, then you can login by enter
 **[local django admin](http://localhost:8000/admin/)** with User / Password: **superuser** / **sup12345** .
 
-Good request (will create an object):
+Here are some Good requests (will create an object):
 
 `POST /api/sample_model/ title="New Title" sequence="789"`
 `POST /api/sample_model/ title="Another New Title"`
 
-Bad request (will **NOT** create an object and will return **"400 Bad Request"**):
+Below is a Bad request (will **NOT** create an object and will return **"400 Bad Request"**):
 
 `POST /api/sample_model/ sequence="789"`
 
@@ -198,7 +214,7 @@ ObjectHandler is designed for getting, updating or deleting an **object resource
 
 #### GET: Getting an object
 
-When you make a GET request to url like **/api/:collection/:object_id/**, it will simply return the object matching the **object\_id**. For example, if you make a request:
+When you make a GET request to url like **/api/:collection/:object_id/**, it will simply return the object matching the given **object\_id**. For example, if you make a request:
 
 `GET /api/sample_model/1/`
 
@@ -214,7 +230,7 @@ you will get the SampleModel object with id = 1:
 ```
 
 
-and your **handlers.py** file should look like this:
+to get this response, your **handlers.py** file might look like this:
 
 ```python
 from rest_api.handler import BaseObjectHandler
@@ -224,6 +240,24 @@ class ObjectHandler(BaseObjectHandler):
 	allowed_methods = ('GET', )
 	query_model = SampleModel
 	read_auth_exempt = True
+```
+
+and you have to update your **urls.py** to pass `object_id` into ObjectHandler:
+
+**urls.py**
+
+```python
+from django.conf.urls import url
+from django.contrib import admin
+
+from sample_app.handlers import IndexHandler, ObjectHandler
+from rest_api.resources import BaseResource
+
+urlpatterns = [
+  url(r'^admin/', admin.site.urls),
+  url(r'^api/sample_model/$', BaseResource(handler=IndexHandler)),
+  url(r'^api/sample_model/(?P<object_id>\w+)/$', BaseResource(handler=ObjectHandler)),
+]
 ```
 
 #### POST: Updating an object
@@ -243,7 +277,7 @@ the api will update the sequence field for object with id = 2:
 }
 ```
 
-and your **handlers.py** file should look like this:
+your **handlers.py** file should look like this:
 
 ```
 from rest_api.handler import BaseObjectHandler
@@ -265,19 +299,31 @@ class ObjectHandler(BaseObjectHandler):
 
 ```
 
-#### /api/:collection/:object_id/
+TODO: link to handler basic structure
+
+
+#### DELETE: Deleting an object
+
+When you make a DELETE request to url **/api/:collection/:object_id/**, you will delete the data of the specific object matching **object\_id**. If you make a DELETE request like this:
+
+`DELETE /api/sample_model/2/`
+
+then the SampleModel object with id 2 will be deleted. All you have to do is add `'DELETE'` to `allowed_methods`: 
+
+`allowed_methods = ('GET', 'POST', 'DELETE')`
+
+Note: for safety concern, by default only loggined users can make a DELETE request. If you want that even anonymous user can make a DELETE request, you can set `delete_auth_exempt = True` for ObjectHandler.
 
 
 
-
-## Runnable Django Example Project
+## Full Django Example Project
 A full example is in **django_example** folder. After download, do:
 
-**Install django-rest-api (best in a virtual env):**
+#### Install django-rest-api (best in a virtual env):
 
 ```pip install -r requirements.txt```
 
-**Runserver:**
+#### Runserver:
 
 ```./manage.py runserver```
 
