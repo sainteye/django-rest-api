@@ -131,7 +131,7 @@ class BaseResource(Resource):
                             'info': {}
                         }
 
-                if display_success:
+                if display_success and not type(raw_response)==dict:
                     result['success'] = True
             else:
                 result = raw_response

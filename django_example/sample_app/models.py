@@ -11,6 +11,7 @@ class SampleModel(models.Model):
     
     def to_json(self, **kwargs):
         return {
+        	'id': self.id,
             'title': self.title,
             'created': self.created,
             'sequence': self.sequence,

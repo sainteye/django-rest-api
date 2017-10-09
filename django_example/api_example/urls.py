@@ -17,9 +17,10 @@ from django.conf.urls import url
 from django.contrib import admin
 
 from rest_api.resources import BaseResource
-from sample_app.handlers import IndexHandler
+from sample_app.handlers import IndexHandler, ObjectHandler
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/sample_model/', BaseResource(handler=IndexHandler)),
+    url(r'^api/sample_model/$', BaseResource(handler=IndexHandler)),
+    url(r'^api/sample_model/(?P<object_id>\w+)/$', BaseResource(handler=ObjectHandler)),
 ]
