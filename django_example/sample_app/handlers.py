@@ -1,5 +1,7 @@
 
 from rest_api.handler import BaseIndexHandler, BaseObjectHandler
+from rest_api.utils import process_integer
+
 from sample_app.models import SampleModel
 
 class IndexHandler(BaseIndexHandler):
@@ -10,6 +12,7 @@ class IndexHandler(BaseIndexHandler):
 	# for POST function
 	create_kwargs = ('title', 'sequence')
 	required_fields = ('title', )
+	create_auth_exempt = False
 
 	def create(self, request, **kwargs):
 		title = request.CLEANED['title']
@@ -21,7 +24,14 @@ class IndexHandler(BaseIndexHandler):
 
 
 class ObjectHandler(BaseObjectHandler):
-	allowed_methods = ('GET', )
+	allowed_methods = ('GET', 'POST')
 	query_model = SampleModel
 	read_auth_exempt = True
+
+	create_kwargs = ('title', 'sequence')
+	form_fields = ('title', 'sequence')
+	update_instead_save = True
+
+	def create_validate(self, query_dict, **kwargs):
+		process_integer(query_dict, ['sequence'])
 
