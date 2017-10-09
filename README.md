@@ -34,6 +34,7 @@ class SampleModel(models.Model):
     
   def to_json(self, **kwargs):
     return {
+      'id': self.id,
       'title': self.title,
       'created': self.created,
       'sequence': self.sequence,
@@ -51,8 +52,8 @@ from sample_app.models import SampleModel
 
 class IndexHandler(BaseIndexHandler):
   allowed_methods = ('GET', ) 
-	query_model = SampleModel
-	read_auth_exempt = True
+  query_model = SampleModel
+  read_auth_exempt = True
 
 ```
 
@@ -135,9 +136,9 @@ from rest_api.handler import BaseIndexHandler
 from sample_app.models import SampleModel
 
 class IndexHandler(BaseIndexHandler):
-	allowed_methods = ('GET', )
-	query_model = SampleModel
-	read_auth_exempt = True
+  allowed_methods = ('GET', )
+  query_model = SampleModel
+  read_auth_exempt = True
 ```
 
 set attribute `read_auth_exempt = True` to ensure anonymous users can access this resource. Otherwise, only loggined users can access this resource.
@@ -151,22 +152,21 @@ from rest_api.handler import BaseIndexHandler
 from sample_app.models import SampleModel
 
 class IndexHandler(BaseIndexHandler):
-	allowed_methods = ('GET', 'POST')
-	query_model = SampleModel
-	read_auth_exempt = True
+  allowed_methods = ('GET', 'POST')
+  query_model = SampleModel
+  read_auth_exempt = True
 
-	# for POST function
-	create_kwargs = ('title', 'sequence')
-	required_fields = ('title', )
-	create_auth_exempt = False
+  # for POST function
+  create_kwargs = ('title', 'sequence')
+  required_fields = ('title', )
+  create_auth_exempt = False
 
-	def create(self, request, **kwargs):
-		title = request.CLEANED['title']
-		sequence = request.CLEANED['sequence']
-		sample_obj = SampleModel(title=title, sequence=sequence)
-		sample_obj.save()
-
-		return sample_obj.to_json()
+  def create(self, request, **kwargs):
+    title = request.CLEANED['title']
+    sequence = request.CLEANED['sequence']
+    sample_obj = SampleModel(title=title, sequence=sequence)
+    sample_obj.save()
+    return sample_obj.to_json()
 ```
 
 `create_kwargs` defines what POST data will be passed into `create` method. You can access these data in `request.CLEANED`, it is a dictionary just like **"request.GET/request.POST"** in native django Request object. `required_fields` defines what POST data **must** be specified by request. If a user did not specify the data content for fields in `required_fields`, api will return **"400 Bad Request"**. 
@@ -237,9 +237,9 @@ from rest_api.handler import BaseObjectHandler
 from sample_app.models import SampleModel
 
 class ObjectHandler(BaseObjectHandler):
-	allowed_methods = ('GET', )
-	query_model = SampleModel
-	read_auth_exempt = True
+  allowed_methods = ('GET', )
+  query_model = SampleModel
+  read_auth_exempt = True
 ```
 
 and you have to update your **urls.py** to pass `object_id` into ObjectHandler:
@@ -286,16 +286,16 @@ from rest_api.utils import process_integer
 from sample_app.models import SampleModel
 
 class ObjectHandler(BaseObjectHandler):
-	allowed_methods = ('GET', 'POST')
-	query_model = SampleModel
-	read_auth_exempt = True
+  allowed_methods = ('GET', 'POST')
+  query_model = SampleModel
+  read_auth_exempt = True
 
-	create_kwargs = ('title', 'sequence')
-	form_fields = ('title', 'sequence')
-	update_instead_save = True
+  create_kwargs = ('title', 'sequence')
+  form_fields = ('title', 'sequence')
+  update_instead_save = True
 
-	def create_validate(self, query_dict, **kwargs):
-		process_integer(query_dict, ['sequence'])
+  def create_validate(self, query_dict, **kwargs):
+    process_integer(query_dict, ['sequence'])
 
 ```
 
