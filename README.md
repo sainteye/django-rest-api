@@ -6,8 +6,13 @@ Thanks for taking a look at **django-rest-api**! We take pride in having an easy
 
 This framework is based on [django-piston](https://pypi.python.org/pypi/django-piston/0.2.3) (but basically they are very different). It should work for Django version greater than `Django==1.11.5`.
 
+# Documentation
+- [High-Level Concept](#high-level-concept)
+- [Handler Structure](#handler-structure)
+- [API Utils](#api-utils)
 
-## Simple Usage for Django Model RESTful API
+
+## Simple Usage for Django RESTful API
 
 To install django-rest-api, simply use pip:
 
@@ -110,8 +115,7 @@ You will get your first api response:
       "id": 2,
       "created": 1507528451
     }
-  ],
-  "success": true
+  ]
 }
 ```
 
@@ -145,8 +149,7 @@ For RESTful api, basically we have two different type resources. One is for coll
       "created": 1507528451
     }
   ],
-  "info": {},
-  "success": true
+  "info": {}
 }
 ```
 
@@ -199,7 +202,6 @@ Basically, users have to login your service to create an object. Therefore, by d
 
 ```json
 {
-    "success": false,
     "error": {
         "message": "Authentication required.",
         "code": 10100
@@ -223,7 +225,6 @@ Below is a Bad request (will **NOT** create an object and will return **"400 Bad
 
 ```json
 {
-    "success": false,
     "error": {
         "debug": "'title' is missing in params.",
         "message": "Method signature does not match.",
@@ -318,7 +319,7 @@ the api will update the sequence field for object with id = 2:
 
 your **handlers.py** file should look like this:
 
-```
+```python
 from rest_api.handler import BaseObjectHandler
 from rest_api.utils import process_integer
 
@@ -338,7 +339,7 @@ class ObjectHandler(BaseObjectHandler):
 
 ```
 
-TODO: link to handler basic structure
+read more in [Handler Structure](#handler-structure)
 
 
 #### DELETE: Deleting an object
@@ -352,6 +353,276 @@ then the SampleModel object with id 2 will be deleted. All you have to do is add
 `allowed_methods = ('GET', 'POST', 'DELETE')`
 
 Note: for safety concern, by default only loggined users can make a DELETE request. If you want that even anonymous user can make a DELETE request, you can set `delete_auth_exempt = True` for ObjectHandler.
+
+# Handler Structure
+
+## Execute Flow
+Basically, a handler can handle three different type request: GET, POST, DELETE. Here is the request method executation flow:
+
+**GET:** `read_validate` -> `read`
+
+**POST:** `create_validate` -> `create`
+
+**DELETE:** `delete_validate` -> `delete`
+
+We use GET request to clarify the request processed flow. In `read_validate`, you can **validate and clean** request data. For GET request, the request data must be defined in `read_kwargs` attribute. **Data not defined in `read_kwargs` will be not accessible.**
+
+In `read_validate` method, request data can be accessed in `query_dict`. You can use functions in `rest_api.utils` to clean and verify reqeust data. For example, `process_integer` can ensure the request data be converted into python integer.
+
+After you validate and clean request data in `read_validate` method, you have to put this data back into `query_dict`. The `query_dict` will be assigned to `request.CLEANED` and can be accessed in the `read` method.
+
+Below is an example, we build a **ConvertDataHandler** for the url **/api/convert_data/**.
+
+```python
+from rest_api.handler import BaseHandler
+from rest_api.utils import process_integer
+
+class ConvertDataHandler(BaseHandler):
+  allowed_methods = ('GET', )
+  read_auth_exempt = True  
+  read_kwargs = ('title', 'sequence')
+    
+  def read_validate(self, query_dict, request, **kwargs):
+    # Validate GET request
+    process_integer(query_dict, ['sequence'])
+    title = query_dict.get('title')
+    if title == '':
+      raise Exception('not a valide title')
+    
+    clean_title = title.replace('+', '')
+    query_dict['clean_title'] = clean_title
+    
+    inc_sequence = query_dict.get('sequence', 0)
+    query_dict['inc_sequence'] = inc_sequence
+    
+  def read(self, request, **kwargs):
+    # Execute GET request
+    clean_title = request.CLEANED['clean_title']
+    inc_sequence = request.CLEANED['inc_sequence']
+    return {'clean_title': clean_title, 'inc_sequence': inc_sequence}
+```
+
+Requet:
+
+`GET /api/convert_data/?title=b+i+k+e&sequence=123`
+
+Response:
+
+```json
+{
+  'clean_title': 'bike',
+  'inc_sequence': 124
+}
+```
+
+Note that the request data ***sequence*** has been converted into python integer after `process_integer(query_dict, ['sequence'])`.
+
+## Settings
+
+### General Settings
+
+`allowed_methods`: Allowed request methods: might be a tuple including 'POST', 'GET', 'DELETE'.
+
+`query_model`: model to query. (only work for IndexHandler & ObjectHandler)
+
+### Authentication
+`superuser_only`: Only superuser can access this api. Default value is **False**
+
+`read_auth_exempt`, `create_auth_exempt`, `delete_auth_exempt`: Let anonymous users to access GET, POST, DELETE method. Default values are all **False**.
+
+
+### GET
+`read_kwargs`: only the parameters in read_kwargs will be kept. (it should be a superset of required_fields_for_read)
+
+`required_fields_for_read `: parameters required for valid GET request.
+
+`allowed_filter`: only the parameters in allowed_filter will be used as query params. (only work for IndexHandler)
+
+### POST
+`create_kwargs`: only the parameters in create_kwargs will be kept. (it should be a superset of required_fields)
+
+`required_fields`: lists the parameters that must be specified.
+
+`form_fields`: only the parameters in form_fields will be updated. (only work for ObjectHandler)
+
+`update_instead_save`: use update() method instead save() for object update. It might cause risk condition if it is set as False. True -> update, False -> save. (only work for ObjectHandler)
+
+
+### DELETE
+`delete_kwargs `: lists the parameters that must be specified. (it 
+
+A full example:
+
+```python
+class ExampleHandler(BaseHandler):
+  allowed_methods = ('POST', 'GET', 'DELETE')
+  
+  # For POST:
+  required_fields = ('title', )
+  create_kwargs = ('title', 'sequence')
+  form_fields = ('title', )
+  update_instead_save = True
+
+  # For GET:
+  required_fields_for_read = ()
+  read_kwargs = ('title', 'sequence')
+  allowed_filter = ('sequence', )
+
+  # For DELETE:
+  delete_kwargs = ()
+
+  query_model = SampleModel
+  read_auth_exempt = True
+  create_auth_exempt = False
+  delete_auth_exempt = False
+  
+  superuser_only = False
+  
+```
+
+## Response Returning Format
+
+By default, api will wrap response if it is a python list and will directly return response if it is a python dictionary.
+
+**List format**: if you return `[{'id': 1}, {'id': 2}]`, the response will be
+
+```json
+{
+  'info': {}
+  'data': [
+    {'id': 1},
+    {'id': 2}
+  ]
+}
+```
+
+**Dictionary format**: if you return `{'id': 1}`, the response will be
+
+```json
+{
+  'id': 1
+}
+```
+
+By design, we think an api returning list as its response is more complicated. Therefore, there might be some other infomation it wants to provide to users. For example, pagination timestamp:
+
+```json
+{
+  'info': {
+    'latest_ts': 1507528440
+  }
+  'data': [
+    {'id': 1, 'ts': 1507528439},
+    {'id': 2, 'ts': 1507528440}
+  ]
+}
+```
+
+Who gets this response can use `latest_ts` as a parameter for next request and he will get the next page items.
+
+To return `info`, you can use `wrap_info(response, info)`. Here is an example:
+
+```python
+from rest_api.handler import BaseHandler
+from rest_api.utils import wrap_info
+
+class SampleResponseHandler(BaseHandler):
+  allowed_methods = ('GET', )
+  read_auth_exempt = True  
+    
+  def read(self, request, **kwargs):
+    response = [
+      {'id': 1, 'ts': 1507528439},
+      {'id': 2, 'ts': 1507528440}
+    ]
+    info = {
+      'latest_ts': 1507528440
+    }
+    return wrap_info(response, info)
+```
+
+If you do not want api to wrap your response, simply set `REST_API_WITH_WRAPPER = False` in your **settings.py**.
+
+If you set `REST_API_WITH_WRAPPER = False`, the api response will directly return your returning value in handler method.
+
+If your handler return: `[{'id': 1},{'id': 2}]`
+
+With `REST_API_WITH_WRAPPER = True`, your response will be
+
+```json
+{
+  'info': {}
+  'data': [
+    {'id': 1},
+    {'id': 2}
+  ]
+}
+```
+
+with `REST_API_WITH_WRAPPER = False`
+
+```json
+[
+  {'id': 1},
+  {'id': 2}
+]
+```
+
+
+# API Utils
+
+In read\_validate, create\_validate method, we should always make sure that request data will be validated, cleaned and converted into specific python type. django-rest-api provides several utils function to complete it. If the data cannot be validated and converted, api will raise Exception with code `ERROR_GENERAL_BAD_PARA_FORMAT`.
+
+Here is the utils list:
+
+`process_integer`: convert data into integer. `'123' -> 123`
+
+`process_boolean`: convert data into boolean. `'true' -> True, '1' -> True, 'True' -> True`
+
+`process_float`: convert data into float. `'3.14159' -> 3.14159`
+
+
+```python
+from rest_api.handler import BaseHandler
+from rest_api.utils import process_integer, process_float
+
+class IntegerDataHandler(BaseHandler):
+  allowed_methods = ('GET', )
+  read_kwargs = ('a_integer', 'b_integer', 'c_integer', 'd_float')
+    
+  def read_validate(self, query_dict, request, **kwargs):
+    # Validate GET request
+    process_integer(query_dict, ['a_integer', 'b_integer'])
+    print type(query_dict['a_integer'])
+    # <type 'int'>
+    print type(query_dict['b_integer'])
+    # <type 'int'>
+    print type(query_dict['c_integer'])
+    # <type 'string'>
+    process_float(query_dict, ['d_float'])
+    print type(query_dict['d_float'])
+    # <type 'float'>
+    ...
+    
+
+```
+
+# Error Handling
+
+TODO:
+
+**globals/api_errors.py**
+```
+from rest_api.errors import *
+
+ERROR_PROTO_TITLE_ERROR = 20000 #: Proto Model Empty Title Error
+
+IFOODIE_API_ERROR = {
+	ERROR_PROTO_TITLE_ERROR: "Proto Model Empty Title Error",
+}
+
+API_ERRORS.update(IFOODIE_API_ERROR)
+```
 
 
 

@@ -12,11 +12,11 @@ class BaseHandler(PistonBaseHandler):
 
     # For POST:
     # required_fields - lists the parameters that must be specified
-    # create_kwargs - only the parameters in create_kwargs will be kept. (it is a superset of required_fields)
+    # create_kwargs - only the parameters in create_kwargs will be kept. (it should be a superset of required_fields)
     # files_kwargs - corresponding to request.FILES
     # form_fields - only the parameters in form_fields will be updated. (for update object)
-    # perform_save - perform save operation for object update. it might cause risk condition if it is set as "True".
-    #                True -> update, False -> save
+    # update_instead_save - use update() method instead save() for object update. It might cause risk condition if it is set as "False".
+    # True -> update, False -> save
     required_fields = ()
     create_kwargs = ()
     files_kwargs = ()
@@ -24,7 +24,7 @@ class BaseHandler(PistonBaseHandler):
     update_instead_save = False
 
     # For GET:
-    # required_fields_for_read - lists the parameters that must be specified for read 
+    # required_fields_for_read - parameters required for valid GET request
     # read_kwargs - only the parameters in read_kwargs will be kept.
     # allowed_filter - only the parameters in allowed_filter will be used as query params.
     # filter_opt - define several type of special query (see: notify/handlers.py).
