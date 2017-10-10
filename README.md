@@ -156,7 +156,7 @@ For RESTful api, basically we have two different type resources. One is for coll
 
 IndexHandler is designed for **collection resource**. When you make a GET request to url like **/api/:collection/**, it will return collection objects. If you make a POST request to **/api/:collection/**, it will create an object to this collection.
 
-#### GET /api/:collection/
+#### GET /api/:collection/, get objects
 The api should return your collection objects. For GET only collection api, your **handlers.py** file should look like this:
 
 ```python
@@ -172,7 +172,7 @@ class IndexHandler(BaseIndexHandler):
 set attribute `read_auth_exempt = True` to ensure anonymous users can access this resource. Otherwise, only loggined users can access this resource.
 
 
-#### POST /api/:collection/
+#### POST /api/:collection/, create an object
 When you make a POST request to this api, it should **create an object** to this collection. You have to implement ``create`` method and add `'POST'` to handler `allowed_methods`. Now, your **handlers.py** file should look like this:
 
 ```python
@@ -726,8 +726,8 @@ A full example is in **django_example** folder. After download, do:
 
 **Open [http://localhost:8000/api/sample_model/](http://localhost:8000/api/sample_model/) :**
 
-You will get a sample response from your db (sample object already in db.sqlite3):
-![](https://c1.staticflickr.com/5/4503/36876707014_0006f7768a.jpg)
+You will get a sample response from your db (sample objects are already in db.sqlite3):
+![](https://c1.staticflickr.com/5/4484/37563283526_5f9bdd0b78.jpg)
 
 Try to add new object to your database and see api response change.
 
