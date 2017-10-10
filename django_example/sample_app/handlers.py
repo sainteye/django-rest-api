@@ -18,8 +18,7 @@ class IndexHandler(BaseIndexHandler):
 
     def create(self, request, **kwargs):
         title = request.CLEANED['title']
-        sequence = request.CLEANED['sequence']
-        sample_obj = SampleModel(title=title, sequence=sequence)
+        sample_obj = SampleModel(title=title)
         sample_obj.save()
 
         return sample_obj.to_json()

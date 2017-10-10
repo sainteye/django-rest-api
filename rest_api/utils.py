@@ -199,7 +199,7 @@ def process_request(cls, request, *args, **kwargs):
     # For Backbone post data
     _post_json_dict = {}
     if request.META.get('CONTENT_TYPE')=="application/json":
-        _post_json_dict = json.loads(request.raw_post_data)
+        _post_json_dict = json.loads(request.body)
 
     _resource_dict = cls.auth_resource(request=request, json_dict=_post_json_dict, **kwargs)
     if not _resource_dict:
@@ -215,8 +215,8 @@ def process_request(cls, request, *args, **kwargs):
         # For Json
         content_type = request.META.get('CONTENT_TYPE', '')
         if "application/json" in content_type or content_type == '':
-            if request.raw_post_data:
-                json_dict = json.loads(request.raw_post_data)
+            if request.body:
+                json_dict = json.loads(request.body)
                 for kwarg in cls.create_kwargs:
                     if json_dict.get(kwarg) == None and kwarg in cls.required_fields:
                         raise GlobalAPIException(api_errors.ERROR_GENERAL_BAD_SIGNATURE, "'%s' is missing in params." % kwarg)
