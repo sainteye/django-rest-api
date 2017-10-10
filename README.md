@@ -6,6 +6,8 @@ Thanks for taking a look at **django-rest-api**! We take pride in having an easy
 
 This framework is based on [django-piston](https://pypi.python.org/pypi/django-piston/0.2.3) (but basically they are very different). It should work for Django version greater than `Django==1.11.5`.
 
+You can download [Full Example Project](#full-django-example-project) and use this project to build your django api server.
+
 # Documentation
 - [High-Level Concept](#high-level-concept)
 - [Handler Structure](#handler-structure)
