@@ -410,8 +410,8 @@ Response:
 
 ```json
 {
-  'clean_title': 'bike',
-  'inc_sequence': 124
+  "clean_title": "bike",
+  "inc_sequence": 124
 }
 ```
 
@@ -484,23 +484,23 @@ class ExampleHandler(BaseHandler):
 
 By default, api will wrap response if it is a python list and will directly return response if it is a python dictionary.
 
-**List format**: if you return `[{'id': 1}, {'id': 2}]`, the response will be
+**List format**: if you return `[{"id": 1}, {"id": 2}]`, the response will be
 
 ```json
 {
-  'info': {}
-  'data': [
-    {'id': 1},
-    {'id': 2}
+  "info": {}
+  "data": [
+    {"id": 1},
+    {"id": 2}
   ]
 }
 ```
 
-**Dictionary format**: if you return `{'id': 1}`, the response will be
+**Dictionary format**: if you return `{"id": 1}`, the response will be
 
 ```json
 {
-  'id': 1
+  "id": 1
 }
 ```
 
@@ -508,12 +508,12 @@ By design, we think an api returning list as its response is more complicated. T
 
 ```json
 {
-  'info': {
-    'latest_ts': 1507528440
+  "info": {
+    "latest_ts": 1507528440
   }
-  'data': [
-    {'id': 1, 'ts': 1507528439},
-    {'id': 2, 'ts': 1507528440}
+  "data": [
+    {"id": 1, "ts": 1507528439},
+    {"id": 2, "ts": 1507528440}
   ]
 }
 ```
@@ -532,11 +532,11 @@ class SampleResponseHandler(BaseHandler):
     
   def read(self, request, **kwargs):
     response = [
-      {'id': 1, 'ts': 1507528439},
-      {'id': 2, 'ts': 1507528440}
+      {"id": 1, "ts": 1507528439},
+      {"id": 2, "ts": 1507528440}
     ]
     info = {
-      'latest_ts': 1507528440
+      "latest_ts": 1507528440
     }
     return wrap_info(response, info)
 ```
@@ -545,16 +545,16 @@ If you do not want api to wrap your response, simply set `REST_API_WITH_WRAPPER 
 
 If you set `REST_API_WITH_WRAPPER = False`, the api response will directly return your returning value in handler method.
 
-If your handler return: `[{'id': 1},{'id': 2}]`
+If your handler return: `[{"id": 1},{"id": 2}]`
 
 With `REST_API_WITH_WRAPPER = True`, your response will be
 
 ```json
 {
-  'info': {}
-  'data': [
-    {'id': 1},
-    {'id': 2}
+  "info": {}
+  "data": [
+    {"id": 1},
+    {"id": 2}
   ]
 }
 ```
@@ -563,8 +563,8 @@ with `REST_API_WITH_WRAPPER = False`
 
 ```json
 [
-  {'id': 1},
-  {'id': 2}
+  {"id": 1},
+  {"id": 2}
 ]
 ```
 
