@@ -10,6 +10,7 @@ This framework is based on [django-piston](https://pypi.python.org/pypi/django-p
 - [High-Level Concept](#high-level-concept)
 - [Handler Structure](#handler-structure)
 - [API Utils](#api-utils)
+- [Error Handling](#error-handling)
 
 
 ## Simple Usage for Django RESTful API
@@ -233,7 +234,7 @@ Below is a Bad request (will **NOT** create an object and will return **"400 Bad
 }
 ```
 
-TODO: link to error handling section
+read more on [Error Handling](#error-handling) section.
 
 ## ObjectHandler - Object Resource
 
@@ -609,21 +610,107 @@ class IntegerDataHandler(BaseHandler):
 
 # Error Handling
 
-TODO:
+django-rest-api provides serveral basic error handling function and code for general api usage. It also provides the ability to send email to admins after something unexpectly happened. You can also define your customize error Exception and send email mechanism. To achieve this, please follow the structure below:
 
+Build your error handling system, you have to extend two files, **api_errors.py** and **api_resources.py**. Here are the sample files:
+
+
+Define your customize Error Type and Error Code
 **globals/api_errors.py**
-```
+
+```python
 from rest_api.errors import *
 
-ERROR_PROTO_TITLE_ERROR = 20000 #: Proto Model Empty Title Error
+ERROR_SAMPLE_TITLE_ERROR = 20000 #: Empty Title Error
 
-IFOODIE_API_ERROR = {
-	ERROR_PROTO_TITLE_ERROR: "Proto Model Empty Title Error",
+SAMPLE_API_ERROR = {
+	ERROR_SAMPLE_TITLE_ERROR: "Empty Title Error",
 }
 
-API_ERRORS.update(IFOODIE_API_ERROR)
+API_ERRORS.update(SAMPLE_API_ERROR)
 ```
 
+**handlers.py**
+
+```python
+from rest_api.handler import BaseHandler
+from rest_api.errors import GlobalAPIException
+from globals import api_errors
+
+class SampleHandler(BaseHandler):
+  allowed_methods = ('GET',)
+  read_kwargs = ('title', )
+  read_auth_exempt = True
+
+  def read_validate(self, query_dict, **kwargs):
+    if query_dict.get('title') == '':
+      raise GlobalAPIException(api_errors.ERROR_SAMPLE_TITLE_ERROR)
+      # raise a customize APIException
+    
+    if query_dict.get('title') == 'unexpect':
+      query_dict['title'] = undefined_variable
+      # this will cause system error
+    
+  def read(self, request, **kwargs):
+    return {'title': request.CLEANED.get('title')}
+```
+
+If you make a request with empty title, then you will get response:
+
+```json
+{
+  "error": {
+    "message": "Empty Title Error",
+    "code": 20000
+  }
+}
+```
+
+Please customize your error code from **20000** to above. **00000~19999** are reserved for django-rest-api system.
+
+If you make a request with `title` equals `'unexpect'`, it will cause a error without expectation. You will get a response like this:
+
+```json
+{
+  "error": {
+    "debug": "global name 'undefined_variable' is not defined",
+    "message": "Unknown error.  Please contact API team.",
+    "code": 10000
+  }
+}
+```
+
+Generally, we don't want our api system having any **"Unexpected Error"**. Therefore, when this type error happened, the api system should email administrators to solve this problem. To implement a auto mailing system, you have to extend the `BaseResource` and use your `Resource` class in the **urls.py**.
+
+
+**globals/api_resources.py**
+
+```python
+from rest_api.resources import BaseResource
+
+class Resource(BaseResource):
+  def email_exception(self, reporter):
+    # TODO: Implement Your Email Function Here
+    pass
+```
+
+**urls.py**
+
+```python
+from django.conf.urls import url
+from django.contrib import admin
+
+from globals.api_resources import Resource
+from sample_app.handlers import IndexHandler, ObjectHandler, SampleHandler
+
+urlpatterns = [
+  url(r'^admin/', admin.site.urls),
+  url(r'^api/sample_model/$', Resource(handler=IndexHandler)),
+  url(r'^api/sample_model/(?P<object_id>\w+)/$', Resource(handler=ObjectHandler)),
+  url(r'^api/sample/$', Resource(handler=SampleHandler)),
+]
+
+```
 
 
 ## Full Django Example Project

@@ -76,11 +76,21 @@ class BaseHandler(PistonBaseHandler):
     def create_validate(self, query_dict, **kwargs):
         pass
 
+    def create(self, request, **kwargs):
+        pass
+
     def read_validate(self, query_dict, **kwargs):
+        pass
+
+    def read(self, request, **kwargs):
         pass
 
     def delete_validate(self, query_dict, **kwargs):
         pass
+
+    def delete(self, request, **kwargs):
+        pass
+
 
 # ============== Index Handler =============
 class BaseIndexHandler(BaseHandler):

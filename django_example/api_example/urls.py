@@ -16,11 +16,17 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+from globals.api_resources import Resource
 from rest_api.resources import BaseResource
-from sample_app.handlers import IndexHandler, ObjectHandler
+from sample_app.handlers import IndexHandler, ObjectHandler, SampleHandler
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+
+    # Apis using BaseResource will not email unexpected error.
     url(r'^api/sample_model/$', BaseResource(handler=IndexHandler)),
     url(r'^api/sample_model/(?P<object_id>\w+)/$', BaseResource(handler=ObjectHandler)),
+
+    # Only this api calls your customize "Resource" method "email_exception"
+    url(r'^api/sample/$', Resource(handler=SampleHandler)),
 ]
