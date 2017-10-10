@@ -203,10 +203,10 @@ Basically, users have to login your service to create an object. Therefore, by d
 
 ```json
 {
-    "error": {
-        "message": "Authentication required.",
-        "code": 10100
-    }
+  "error": {
+    "message": "Authentication required.",
+    "code": 10100
+  }
 }
 
 ```
@@ -226,11 +226,11 @@ Below is a Bad request (will **NOT** create an object and will return **"400 Bad
 
 ```json
 {
-    "error": {
-        "debug": "'title' is missing in params.",
-        "message": "Method signature does not match.",
-        "code": 10001
-    }
+  "error": {
+    "debug": "'title' is missing in params.",
+    "message": "Method signature does not match.",
+    "code": 10001
+  }
 }
 ```
 
@@ -489,7 +489,7 @@ By default, api will wrap response if it is a python list and will directly retu
 
 ```json
 {
-  "info": {}
+  "info": {},
   "data": [
     {"id": 1},
     {"id": 2}
@@ -624,7 +624,7 @@ from rest_api.errors import *
 ERROR_SAMPLE_TITLE_ERROR = 20000 #: Empty Title Error
 
 SAMPLE_API_ERROR = {
-	ERROR_SAMPLE_TITLE_ERROR: "Empty Title Error",
+  ERROR_SAMPLE_TITLE_ERROR: "Empty Title Error",
 }
 
 API_ERRORS.update(SAMPLE_API_ERROR)
@@ -649,7 +649,7 @@ class SampleHandler(BaseHandler):
     
     if query_dict.get('title') == 'unexpect':
       query_dict['title'] = undefined_variable
-      # this will cause system error
+      # undefined_variable is not defined, this will cause system error
     
   def read(self, request, **kwargs):
     return {'title': request.CLEANED.get('title')}
@@ -668,7 +668,7 @@ If you make a request with empty title, then you will get response:
 
 Please customize your error code from **20000** to above. **00000~19999** are reserved for django-rest-api system.
 
-If you make a request with `title` equals `'unexpect'`, it will cause a error without expectation. You will get a response like this:
+If you make a request with `title` equals string `'unexpect'`, it will cause an unhandled error. You will get a response like this:
 
 ```json
 {
