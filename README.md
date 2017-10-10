@@ -510,7 +510,7 @@ By design, we think an api returning list as its response is more complicated. T
 {
   "info": {
     "latest_ts": 1507528440
-  }
+  },
   "data": [
     {"id": 1, "ts": 1507528439},
     {"id": 2, "ts": 1507528440}
@@ -551,7 +551,7 @@ With `REST_API_WITH_WRAPPER = True`, your response will be
 
 ```json
 {
-  "info": {}
+  "info": {},
   "data": [
     {"id": 1},
     {"id": 2}
