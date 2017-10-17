@@ -1,5 +1,6 @@
 import time, math
 import json
+import urlparse
 from collections import namedtuple
 
 from datetime import datetime
@@ -209,7 +210,6 @@ def process_request(cls, request, *args, **kwargs):
     # Validate Create Args
     if request.method == 'POST':
         _post = QueryDict('', mutable=True)
-        _post['detail'] = request.POST.get('detail') == 'true'
         # POST parameters
 
         # For Json
@@ -223,10 +223,11 @@ def process_request(cls, request, *args, **kwargs):
                     _post[kwarg] = json_dict.get(kwarg)
         # For XML
         else:
+            _REQUEST_POST = dict(urlparse.parse_qsl(request.body))
             for kwarg in cls.create_kwargs:
-                if request.POST.get(kwarg) == None and kwarg in cls.required_fields:
+                if _REQUEST_POST.get(kwarg) == None and kwarg in cls.required_fields:
                     raise GlobalAPIException(api_errors.ERROR_GENERAL_BAD_SIGNATURE, "'%s' is missing in params." % kwarg)
-                _post[kwarg] = request.POST.get(kwarg)
+                _post[kwarg] = _REQUEST_POST.get(kwarg)
         # FILE parameters
         for kwarg in cls.files_kwargs:
             if request.FILES.get(kwarg) == None and request.POST.get('file64') == None:
