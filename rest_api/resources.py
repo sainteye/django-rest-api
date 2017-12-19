@@ -205,7 +205,7 @@ class BaseResource(Resource):
             self.email_exception(rep)
         
         if isinstance(e, TypeError):
-            result = rc.ALL_OK
+            result = rc.BAD_REQUEST
             hm = HandlerMethod(meth)
             sig = hm.signature
 
