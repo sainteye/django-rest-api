@@ -200,7 +200,8 @@ def process_request(cls, request, *args, **kwargs):
     # For Backbone post data
     _post_json_dict = {}
     if request.META.get('CONTENT_TYPE')=="application/json":
-        _post_json_dict = json.loads(request.body)
+        if request.body:
+            _post_json_dict = json.loads(request.body)
 
     _resource_dict = cls.auth_resource(request=request, json_dict=_post_json_dict, **kwargs)
     if not _resource_dict:
