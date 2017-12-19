@@ -191,7 +191,7 @@ class BaseResource(Resource):
         needs
         """
         debug_msg = None
-        print e
+        print 'API Exception:', e
 
         if request.POST.get('debug') or request.GET.get('debug') or settings.DEBUG:
             debug_msg = e.debug if isinstance(e, api_errors.GlobalAPIException) and e.debug else unicode(e)
